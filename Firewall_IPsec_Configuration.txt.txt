@@ -1,0 +1,55 @@
+conf t
+
+crypto ikev1 enable outside
+ASA0
+
+crypto ikev1 policy 10
+authentication pre-share
+encryption aes
+hash sha
+group 2
+lifetime 86400
+
+access-list LAN1_LAN2 extended permit ip 10.0.0.0 255.255.255.0 40.0.0.0 255.255.255.0
+
+crypto ipsec ikev1 transform-set MYSET esp-aes esp-sha-hmac
+
+crypto map VPNMAP 10 match address LAN1_LAN2
+crypto map VPNMAP 10 set peer 30.0.0.2
+crypto map VPNMAP 10 set ikev1 transform-set MYSET
+
+crypto map VPNMAP interface outside
+
+tunnel-group 30.0.0.2 type ipsec-l2l
+
+tunnel-group 30.0.0.2 ipsec-attributes
+ikev1 pre-shared-key cisco
+
+ASA1
+
+conf t
+
+crypto ikev1 enable outside
+
+crypto ikev1 policy 10
+authentication pre-share
+encryption aes
+hash sha
+group 2
+lifetime 86400
+
+access-list LAN1_LAN2 extended permit ip 40.0.0.0 255.255.255.0 10.0.0.0 255.255.255.0
+
+crypto ipsec ikev1 transform-set MYSET esp-aes esp-sha-hmac
+
+crypto map VPNMAP 10 match address LAN1_LAN2
+crypto map VPNMAP 10 set peer 20.0.0.1
+crypto map VPNMAP 10 set ikev1 transform-set MYSET
+
+crypto map VPNMAP interface outside
+
+tunnel-group 20.0.0.1 type ipsec-l2l
+
+tunnel-group 20.0.0.1 ipsec-attributes
+ikev1 pre-shared-key cisco
+
